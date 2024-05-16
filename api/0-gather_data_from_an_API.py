@@ -27,10 +27,19 @@ def main ():
     for name in names:
         if name["id"] == id_employee:
             user_names.append(name["name"])
+    
 
-    print("Employee {} is done with tasks ({}/{}):".format(user_names[0], len(user_todos), len(user_tasks)))
+    EMPLOYEE_NAME = user_names
+    NUMBER_OF_DONE_TASKS = user_todos
+    TOTAL_NUMBER_OF_TASKS = user_tasks
+    # print("Employee {} is done with tasks ({}/{}):".format(user_names[0], len(user_todos), len(user_tasks)))
+    text =  f"Employee {EMPLOYEE_NAME} is done with tasks({NUMBER_OF_DONE_TASKS}/{TOTAL_NUMBER_OF_TASKS}):"
+
+    print(text)
     for task in user_todos:
         print("\t " + task)
+
+
 
 if __name__ == '__main__':
     main()
