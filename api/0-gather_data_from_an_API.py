@@ -1,5 +1,5 @@
 #!/usr/bin/python3
-
+"""Usamos api para extraer informacion de un archivo json"""
 import requests
 import sys
 
