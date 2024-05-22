@@ -1,53 +1,47 @@
 #!/usr/bin/python3
-"""Consumimos API para extraer información ficticia"""
-import csv
+"""Usamos API para extraer información de un archivo JSON y exportarlo a CSV"""
 import requests
 from sys import argv
-
+import csv
 
 def main():
-    """Consultamos el nombre y las tareas de un empleado."""
-    if len(argv) >= 2 and argv[1].isdigit():
-        id = argv[1]
+    if len(argv) != 2 or not argv[1].isdigit():
+        print("Argumento no válido, introduzca un solo argumento que sea un número")
+        return
+    
+    id = int(argv[1])
 
-        url_id = f"https://jsonplaceholder.typicode.com/users/{id}"
-        url_todos = f"https://jsonplaceholder.typicode.com/users/{id}/todos"
+    url_id = f"https://jsonplaceholder.typicode.com/users/{id}"
+    url_todos = f"https://jsonplaceholder.typicode.com/users/{id}/todos"
 
+    try:
         response = requests.get(url_id)
+        response.raise_for_status()
+        user = response.json()
 
-        if response.status_code != 200:
-            print(f"Ups... tuvimos un problema par consultar el {id}")
-            exit()
-
-        data = response.json()
-        EMPLOYEE_NAME = data['username']
+        EMPLOYEE_NAME = user["name"]
 
         response = requests.get(url_todos)
-
-        if response.status_code != 200:
-            print(f"Ups... tuvimos un problema par consultar el {id}")
-            exit()
-
+        response.raise_for_status()
         todos = response.json()
 
-        all_tasks = [todo['title'] for todo in todos]
-        status_task = [todo['completed'] for todo in todos]
+        # Aquí vamos a crear la lista de registros que queremos escribir en el CSV
         employee_todos = []
 
-        for index in range(0, len(all_tasks)):
-            record = [str(id), EMPLOYEE_NAME, str(
-                status_task[index]), all_tasks[index]]
-
+        for todo in todos:
+            record = [str(id), EMPLOYEE_NAME, str(todo["completed"]), todo["title"]]
             employee_todos.append(record)
 
-        name_file_csv = f'{id}.csv'
-
-        with open(name_file_csv, mode='w', newline='') as f:
-            writer = csv.writer(f, quoting=csv.QUOTE_ALL)
+        # Escribir los registros en un archivo CSV
+        filename = f"{id}.csv"
+        with open(filename, mode='w', newline='') as file:
+            writer = csv.writer(file, quoting=csv.QUOTE_ALL)
             writer.writerows(employee_todos)
-    else:
-        print("Se esperaba que ingresará un ID valido")
 
+        print(f"Datos exportados a {filename}")
 
-if __name__ == '__main__':
+    except requests.exceptions.RequestException as e:
+        print(f"Error de solicitud: {e}")
+
+if __name__ == "__main__":
     main()
