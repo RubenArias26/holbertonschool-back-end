@@ -1,45 +1,47 @@
 #!/usr/bin/python3
 """Usamos api para extraer informacion de un archivo json"""
 import requests
-import sys
+from sys import argv
 
-def main ():
-    #coloco el url del json donde vamos a sacar la informacion
-    url = "https://jsonplaceholder.typicode.com/"
+def main():
     #luego se crea una variable para que contenga el parametro de busqueda que el usuario introducira
-    id_employee = int(sys.argv[1])
-    #luego iniciamos con la peticion http
-    todos = requests.get(url + "/todos").json()
-    names = requests.get(url + "/users").json()
-    #ahora creamos la variable donde va a contener toda la informacion que obtendra , luego de la iteracion que realizemos
-    user_todos = []
-    user_names = []
-    user_tasks = [] 
-    #este bucle es para encontrar y filtrar los titles
-    for todo in todos:
-        if todo["userId"] == id_employee:
-            user_tasks.append(todo)
-            if todo["completed"] == True:
-                user_todos.append(todo["title"])
-
-
-    #este es para encontrar el nombre del empleado
-    for name in names:
-        if name["id"] == id_employee:
-            user_names.append(name["name"])
+    if len(argv) != 2 or not argv[1].isdigit():
+        print("argumento no valido, introduzca un solo argumento que sea un numero")
+        return
     
+    id = int(argv[1])
 
-    EMPLOYEE_NAME = user_names
-    NUMBER_OF_DONE_TASKS = user_todos
-    TOTAL_NUMBER_OF_TASKS = user_tasks
-    # print("Employee {} is done with tasks ({}/{}):".format(user_names[0], len(user_todos), len(user_tasks)))
-    text =  f"Employee {EMPLOYEE_NAME} is done with tasks({NUMBER_OF_DONE_TASKS}/{TOTAL_NUMBER_OF_TASKS}):"
+    url_id = f"https://jsonplaceholder.typicode.com/users/{id}"
+    url_todos = f"https://jsonplaceholder.typicode.com/users/{id}/todos"
 
-    print(text)
-    for task in user_todos:
-        print("\t " + task)
+    # bloque de try-except con el que vamos a trabajar
+    try:
+        # buscamos obtener el id que se da como argumento y guardarlo en una variable con el nombre relacionado a su id
+        response = requests.get(url_id).json()
 
+        if response["id"] == id:
+            data = response["name"]
+            EMPLOYEE_NAME = data
 
+        todos = requests.get(url_todos).json()
+        NUMBER_OF_DONE_TASKS = []
+        TOTAL_NUMBER_OF_TASKS = []
 
-if __name__ == '__main__':
+        # iteramos para poder añadir todas las tasks que tiene tal id, y para obtener tambien las que ha concluido
+        for todo in todos:
+            if todo["userId"] == id:
+                TOTAL_NUMBER_OF_TASKS.append(todo)
+                if todo["completed"] == True:
+                    NUMBER_OF_DONE_TASKS.append(todo["title"])
+        
+        text = f"employee {EMPLOYEE_NAME} is done with tasks({len(NUMBER_OF_DONE_TASKS)}/{len(TOTAL_NUMBER_OF_TASKS)}):"
+
+        print(text)
+
+        for task in NUMBER_OF_DONE_TASKS:
+            print("\t" + task)
+
+    except requests.exceptions.RequestException as e:
+        print(f"Error de solicitud: {e}")
+if __name__ == "__main__":
     main()
