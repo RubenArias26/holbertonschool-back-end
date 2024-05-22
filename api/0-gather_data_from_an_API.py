@@ -7,7 +7,7 @@ from sys import argv
 def main():
     """Consultamos el nombre y las tareas de un empleado."""
     if len(argv) != 2 or not argv[1].isdigit():
-        print("Argumento no válido, introduzca un solo argumento que sea un número")
+        print("Argumento no válido")
         return
 
     id = int(argv[1])
