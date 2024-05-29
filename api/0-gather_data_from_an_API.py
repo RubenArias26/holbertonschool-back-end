@@ -15,9 +15,10 @@ def main():
     url_todos = f"https://jsonplaceholder.typicode.com/users/{id}/todos"
 
     try:
-        response = requests.get(url_id).json()
-        if response["id"] == id:
-            EMPLOYEE_NAME = response["name"]
+        response = requests.get(url_id)
+        if response.status_code == 200:
+            data = response.json()
+            EMPLOYEE_NAME = data["name"]
 
         todos = requests.get(url_todos).json()
         NUMBER_OF_DONE_TASKS = []
