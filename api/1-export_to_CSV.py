@@ -1,47 +1,45 @@
 #!/usr/bin/python3
-"""Usamos API para extraer información de un archivo JSON y exportarlo a CSV"""
+"""Usamos API para extraer información de un archivo JSON"""
 import requests
 from sys import argv
 import csv
 
-def main():
-    if len(argv) != 2 or not argv[1].isdigit():
-        print("Argumento no válido, introduzca un solo argumento que sea un número")
-        return
-    
-    id = int(argv[1])
 
+def main():
+    """Consultamos el nombre y las tareas de un empleado."""
+    if len(argv) != 2 or not argv[1].isdigit():
+        print("Argumento no válido")
+        return
+
+    id = int(argv[1])
     url_id = f"https://jsonplaceholder.typicode.com/users/{id}"
     url_todos = f"https://jsonplaceholder.typicode.com/users/{id}/todos"
 
     try:
         response = requests.get(url_id)
-        response.raise_for_status()
-        user = response.json()
+        if response.status_code == 200:
+            data = response.json()
+            EMPLOYEE_NAME = data["username"]
 
-        EMPLOYEE_NAME = user["name"]
+        todos = requests.get(url_todos).json()
 
-        response = requests.get(url_todos)
-        response.raise_for_status()
-        todos = response.json()
-
-        # Aquí vamos a crear la lista de registros que queremos escribir en el CSV
+        task_status = [todo["completed"] for todo in todos]
+        all_tasks = [todo["title"]for todo in todos]
         employee_todos = []
 
-        for todo in todos:
-            record = [str(id), EMPLOYEE_NAME, str(todo["completed"]), todo["title"]]
+        for index in range(0, len(all_tasks)):
+            record = [str(id), EMPLOYEE_NAME, str(task_status[index]), all_tasks[index] ]
             employee_todos.append(record)
 
-        # Escribir los registros en un archivo CSV
-        filename = f"{id}.csv"
-        with open(filename, mode='w', newline='') as file:
-            writer = csv.writer(file, quoting=csv.QUOTE_ALL)
-            writer.writerows(employee_todos)
+        csv_file = f"{id}.csv"
 
-        print(f"Datos exportados a {filename}")
+        with open(csv_file, mode='w', newline='') as f:
+            writer = csv.writer(f, quoting=csv.QUOTE_ALL)
+            writer.writerows(employee_todos)
 
     except requests.exceptions.RequestException as e:
         print(f"Error de solicitud: {e}")
+
 
 if __name__ == "__main__":
     main()
