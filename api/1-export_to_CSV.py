@@ -1,8 +1,8 @@
 #!/usr/bin/python3
 """Usamos API para extraer información de un archivo JSON"""
+import csv
 import requests
 from sys import argv
-import csv
 
 
 def main():
@@ -28,7 +28,7 @@ def main():
         employee_todos = []
 
         for index in range(0, len(all_tasks)):
-            record = [str(id), EMPLOYEE_NAME, str(task_status[index]), all_tasks[index] ]
+            record = [str(id),EMPLOYEE_NAME,str(task_status[index]),all_tasks[index]]
             employee_todos.append(record)
 
         csv_file = f"{id}.csv"
